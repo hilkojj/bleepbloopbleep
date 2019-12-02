@@ -1,6 +1,6 @@
 
-#include "gu/game_utils.h"
-#include "test_screens/mesh_screen.cpp"
+#include <gu/game_utils.h>
+#include "level_screen.cpp"
 
 int main()
 {
@@ -10,14 +10,13 @@ int main()
     config.title = "My game";
     config.showFPSInTitleBar = true; // note: this option will hide the default title.
     config.vsync = false;
-    config.samples = 4;
+    config.printOpenGLMessages = false;
     if (!gu::init(config))
         return -1;
 
     std::cout << "Running game with OpenGL version: " << glGetString(GL_VERSION) << "\n";
 
-    // TODO: create your own screen that extends the Screen class (gu/screen.h)
-    MeshScreen scr;
+    LevelScreen scr;
 
     gu::setScreen(&scr);
 
