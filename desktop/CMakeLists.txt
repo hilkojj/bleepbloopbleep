@@ -15,6 +15,12 @@ set_property(TARGET game PROPERTY CXX_STANDARD_REQUIRED ON)
 add_subdirectory(../gu/library/ ./bin/gu)
 target_link_libraries(game gameutils)
 
+# FastNoise repo:
+add_library(FastNoise ../FastNoise/FastNoise.h ../FastNoise/FastNoise.cpp)
+target_include_directories(FastNoise PUBLIC ../FastNoise/)
+
+target_link_libraries(game gameutils FastNoise)
+
 # -no-pie is used to get 'application/x-application' as mime type instead of 'application/x-sharedlib'
 set(CMAKE_CXX_FLAGS  "-no-pie -O3")
 

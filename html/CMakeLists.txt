@@ -15,6 +15,16 @@ set_property(TARGET game PROPERTY CXX_STANDARD_REQUIRED ON)
 add_subdirectory(../gu/library/ ./bin/gu)
 target_link_libraries(game gameutils)
 
+# FastNoise repo:
+add_library(FastNoise ../FastNoise/FastNoise.h ../FastNoise/FastNoise.cpp)
+target_include_directories(FastNoise PUBLIC ../FastNoise/)
+
+set_property(TARGET FastNoise PROPERTY CXX_STANDARD 17)
+set_property(TARGET FastNoise PROPERTY CXX_STANDARD_REQUIRED ON)
+
+
+target_link_libraries(game gameutils FastNoise)
+
 set(CMAKE_CXX_FLAGS  "-O3")
 
 set_target_properties(game PROPERTIES SUFFIX ".html")
