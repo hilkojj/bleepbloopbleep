@@ -1,4 +1,6 @@
 
+Thanks to Timo Strating for helping with marching cubes. ([his project](https://github.com/timostrating/TinyPokemonWorld))
+
 ## Usage
 
 Fork/clone this repository.

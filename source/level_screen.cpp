@@ -9,7 +9,7 @@
 #include <FastNoise.h>
 #include <graphics/frame_buffer.h>
 #include <utils/quad_renderer.h>
-#include "level/chunk.h"
+#include "level/level.h"
 
 class LevelScreen : public Screen
 {
@@ -21,9 +21,11 @@ class LevelScreen : public Screen
 
     ShaderProgram terrainShader;
 
-    Chunk chunk;
+    Level level;
 
     FrameBuffer *sceneBuffer = NULL;
+
+    ChunkLoader *loader = NULL;
 
   public:
 
@@ -33,20 +35,14 @@ class LevelScreen : public Screen
             camController(&cam),
             terrainShader(ShaderProgram::fromFiles("terrainShader", "assets/shaders/test.vert", "assets/shaders/normaltest.frag"))
     {
+        MouseInput::setLockedMode(false);
+
         cam.position = vec3(6);
         cam.lookAt(mu::ZERO_3);
         camController.speedMultiplier = 10;
-//        MouseInput::setLockedMode(false);
 
-        FastNoise noise;
-
-        mu::loop3d(Chunk::SIZE, [&](int x, int y, int z) {
-
-            chunk.bitmap[x][y][z] = noise.GetSimplex(x * 1, y * 1, z * 1) > .5;
-            return true;
-        });
-        chunk.generateMesh();
-
+        loader = level.chunks.createLoader();
+        loader->range = 10;
 
         glEnable(GL_CULL_FACE);
         glCullFace(GL_BACK);
@@ -60,6 +56,11 @@ class LevelScreen : public Screen
         time += deltaTime;
 
         camController.update(deltaTime);
+        loader->pos = cam.position;
+
+        level.update(deltaTime);
+
+        MouseInput::setLockedMode(true);
 
         lineRenderer.projection = cam.combined;
 
@@ -108,11 +109,35 @@ class LevelScreen : public Screen
             lineRenderer.line(vec3(line.x, intersectY, line.y), p1, mu::X);
             lineRenderer.line(vec3(line.x, intersectY, line.y), p2, mu::X);
         }
-
         terrainShader.use();
         glUniformMatrix4fv(terrainShader.location("MVP"), 1, GL_FALSE, &cam.combined[0][0]);
 
-        chunk.mesh->renderArrays();
+        for (auto &c : level.chunks.getLoadedColumns())
+            for (int y = 0; y < ChunkColumn::NR_OF_CHUNKS; y++)
+            {
+
+                c->get(y)->mesh->renderArrays();
+//                lineRenderer.line(
+//                        vec3(c->levelLocation.x * Chunk::SIZE, 0, c->levelLocation.y * Chunk::SIZE),
+//                        vec3(c->levelLocation.x * Chunk::SIZE, ChunkColumn::NR_OF_CHUNKS * Chunk::SIZE, c->levelLocation.y * Chunk::SIZE),
+//                        mu::X
+//                );
+//                lineRenderer.line(
+//                        vec3((c->levelLocation.x + 1) * Chunk::SIZE, 0, c->levelLocation.y * Chunk::SIZE),
+//                        vec3((c->levelLocation.x + 1) * Chunk::SIZE, ChunkColumn::NR_OF_CHUNKS * Chunk::SIZE, c->levelLocation.y * Chunk::SIZE),
+//                        mu::X
+//                );
+//                lineRenderer.line(
+//                        vec3((c->levelLocation.x + 1) * Chunk::SIZE, 0, (c->levelLocation.y + 1) * Chunk::SIZE),
+//                        vec3((c->levelLocation.x + 1) * Chunk::SIZE, ChunkColumn::NR_OF_CHUNKS * Chunk::SIZE, (c->levelLocation.y + 1) * Chunk::SIZE),
+//                        mu::X
+//                );
+//                lineRenderer.line(
+//                        vec3(c->levelLocation.x * Chunk::SIZE, 0, (c->levelLocation.y + 1) * Chunk::SIZE),
+//                        vec3(c->levelLocation.x * Chunk::SIZE, ChunkColumn::NR_OF_CHUNKS * Chunk::SIZE, (c->levelLocation.y + 1) * Chunk::SIZE),
+//                        mu::X
+//                );
+            }
 
         sceneBuffer->unbind();
 

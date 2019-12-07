@@ -1,7 +1,3 @@
-//
-// Created by kaasflip on 2-12-19.
-//
-
 #include <utils/math_utils.h>
 #include <graphics/3d/vert_buffer.h>
 #include "chunk.h"
@@ -12,20 +8,23 @@
  */
 void Chunk::generateMesh()
 {
+    auto meshName = "chunk_" + to_string(levelLocation);
 
-    mesh = SharedMesh(new Mesh("chunk_mesh", 0, 0, VertAttributes().add_(VertAttributes::POSITION).add_(VertAttributes::NORMAL)));
+    mesh = SharedMesh(new Mesh(meshName, 0, 0, VertAttributes().add_(VertAttributes::POSITION).add_(VertAttributes::NORMAL)));
 
     mu::loop3d(SIZE - 1, [&](int x, int y, int z) {
 
-        int cubeIndex = getCubeIndex(x, y, z);
+        int tableIndex = getTriTableIndex(x, y, z);
 
         for (int i = 0; i < 15; i += 3)
         {
-            if (TRI_TABLE[cubeIndex][i] == -1) break;
+            if (TRI_TABLE[tableIndex][i] == -1) break;
 
-            vec3 p1 = vec3(x, y, z) + EDGE_POINTS[TRI_TABLE[cubeIndex][i + 0]];
-            vec3 p2 = vec3(x, y, z) + EDGE_POINTS[TRI_TABLE[cubeIndex][i + 1]];
-            vec3 p3 = vec3(x, y, z) + EDGE_POINTS[TRI_TABLE[cubeIndex][i + 2]];
+            vec3 offset = vec3(SIZE) * vec3(levelLocation);
+
+            vec3 p1 = vec3(x, y, z) + EDGE_POINTS[TRI_TABLE[tableIndex][i + 0]] + offset;
+            vec3 p2 = vec3(x, y, z) + EDGE_POINTS[TRI_TABLE[tableIndex][i + 1]] + offset;
+            vec3 p3 = vec3(x, y, z) + EDGE_POINTS[TRI_TABLE[tableIndex][i + 2]] + offset;
 
             vec3 normal = mu::calculateNormal(p1, p2, p3);
 
@@ -46,7 +45,7 @@ void Chunk::generateMesh()
     VertBuffer::uploadSingleMesh(mesh);
 }
 
-int Chunk::getCubeIndex(int x, int y, int z)
+int Chunk::getTriTableIndex(int x, int y, int z) const
 {
     int cubeIndex = 0;
 
@@ -61,4 +60,14 @@ int Chunk::getCubeIndex(int x, int y, int z)
             cubeIndex += ((uint) 1 << i);
     }
     return cubeIndex;
+}
+
+void Chunk::toWorldPosition(ivec3 &pos)
+{
+    pos += levelLocation * SIZE;
+}
+
+void Chunk::toLocalPosition(ivec3 &pos)
+{
+    pos -= levelLocation * SIZE;
 }
