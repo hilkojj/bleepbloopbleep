@@ -1,0 +1,19 @@
+name: CI
+
+on: [push]
+
+jobs:
+  html_build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v1
+    - uses: lovasoa/setup-emscripten@master
+      with:
+        emscripten-version: '1.38.47'
+    - name: Build html
+      run: |
+        cd html
+        emconfigure cmake .
+        make
