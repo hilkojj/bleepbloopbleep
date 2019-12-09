@@ -1,0 +1,23 @@
+name: HTML_BUILD
+
+on: [push]
+
+jobs:
+  html_build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v1
+    - uses: lovasoa/setup-emscripten@master
+      with:
+        emscripten-version: '1.38.47'
+    - uses: actions/setup-python@v1
+      with:
+        python-version: '3.x'
+    - name: Build html
+      run: |
+        python initialize_project.py
+        cd html
+        emconfigure cmake .
+        make
