@@ -3,4 +3,4 @@
 	url = https://github.com/hilkojj/cpp-game-utils.git
 [submodule "FastNoise"]
 	path = FastNoise
-	url = git@github.com:Auburns/FastNoise.git
+	url = https://github.com/Auburns/FastNoise.git
