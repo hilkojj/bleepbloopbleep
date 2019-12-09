@@ -23,6 +23,7 @@ def file(url, dst):
 
 # command("git init")
 command(f"git submodule add {GU_REPO} gu")
+command("git submodule update --init --recursive")
 
 command("pip install --user glad")
 command("glad --generator=c --extensions=GL_EXT_texture_compression_s3tc --out-path=gu/external/glad")

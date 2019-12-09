@@ -17,7 +17,7 @@ class ChunkLoader
   public:
 
     vec3 pos;
-    u_int8_t range;
+    uint8_t range;
 
     void stop()
     {

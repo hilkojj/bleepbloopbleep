@@ -12,7 +12,7 @@ class LevelGenerator
   public:
     const int seed;
 
-    LevelGenerator(int seed) : seed(seed) {}
+    LevelGenerator(int seed) : seed(seed), noise(seed) {}
 
     ChunkColumn *generateColumn(ivec2 &loc);
     Chunk *generateChunk(ChunkColumn *col, int y);
