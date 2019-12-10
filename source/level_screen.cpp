@@ -43,7 +43,7 @@ class LevelScreen : public Screen
         camController.speedMultiplier = 10;
 
         loader = level.chunks.createLoader();
-        loader->range = 10;
+        loader->range = 16;
 
         glEnable(GL_CULL_FACE);
         glCullFace(GL_BACK);
@@ -61,7 +61,7 @@ class LevelScreen : public Screen
         #endif
 
         camController.update(deltaTime);
-//        loader->pos = cam.position;
+        loader->pos = cam.position;
 
         level.update(deltaTime);
 
@@ -119,7 +119,7 @@ class LevelScreen : public Screen
         {
             for (int y = 0; y < ChunkColumn::NR_OF_CHUNKS; y++)
             {
-                c->get(y)->mesh->mode = GL_LINES;
+//                c->get(y)->mesh->mode = GL_LINES;
 //                c->get(y)->mesh->renderArrays();
 //                lineRenderer.line(
 //                        vec3(c->levelLocation.x * Chunk::SIZE, 0, c->levelLocation.y * Chunk::SIZE),

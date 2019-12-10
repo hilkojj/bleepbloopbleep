@@ -89,8 +89,8 @@ void ChunkManager::load(ChunkColumn *col)
 {
     std::cout << "loading column " << to_string(col->levelLocation) << '\n';
 
-    // todo: loading chunks shouldn't mean that a mesh needs to be created and rendered.
-    for (auto c : col->chunks) c->generateMesh();
+//    // todo: loading chunks shouldn't mean that a mesh needs to be created and rendered.
+//    for (auto c : col->chunks) c->generateMesh();
     col->generateTexture();
     loadedColumns.push_back(col);
 }
