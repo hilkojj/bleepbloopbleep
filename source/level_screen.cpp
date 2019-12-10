@@ -19,7 +19,7 @@ class LevelScreen : public Screen
     PerspectiveCamera cam;
     FlyingCameraController camController;
 
-    ShaderProgram terrainShader;
+    ShaderProgram oldTerrainShader, terrainGeoShader;
 
     Level level;
 
@@ -33,7 +33,8 @@ class LevelScreen : public Screen
             :
             cam(.1, 1000, 1, 1, 55),
             camController(&cam),
-            terrainShader(ShaderProgram::fromFiles("terrainShader", "assets/shaders/test.vert", "assets/shaders/normaltest.frag"))
+            oldTerrainShader(ShaderProgram::fromFiles("oldTerrainShader", "assets/shaders/test.vert", "assets/shaders/normaltest.frag")),
+            terrainGeoShader(ShaderProgram::fromFiles("terrainGeoShader", "assets/shaders/terrain/chunk_column.vert", "assets/shaders/terrain/chunk_column.geom", "assets/shaders/terrain/chunk.frag"))
     {
         MouseInput::setLockedMode(false);
 
@@ -55,12 +56,14 @@ class LevelScreen : public Screen
     {
         time += deltaTime;
 
+        #ifndef EMSCRIPTEN
+        ShaderProgram::reloadFromFile = int(time * 2.) % 2 == 0;
+        #endif
+
         camController.update(deltaTime);
-        loader->pos = cam.position;
+//        loader->pos = cam.position;
 
         level.update(deltaTime);
-
-        MouseInput::setLockedMode(true);
 
         lineRenderer.projection = cam.combined;
 
@@ -109,14 +112,15 @@ class LevelScreen : public Screen
             lineRenderer.line(vec3(line.x, intersectY, line.y), p1, mu::X);
             lineRenderer.line(vec3(line.x, intersectY, line.y), p2, mu::X);
         }
-        terrainShader.use();
-        glUniformMatrix4fv(terrainShader.location("MVP"), 1, GL_FALSE, &cam.combined[0][0]);
+        oldTerrainShader.use();
+        glUniformMatrix4fv(oldTerrainShader.location("MVP"), 1, GL_FALSE, &cam.combined[0][0]);
 
         for (auto &c : level.chunks.getLoadedColumns())
+        {
             for (int y = 0; y < ChunkColumn::NR_OF_CHUNKS; y++)
             {
-
-                c->get(y)->mesh->renderArrays();
+                c->get(y)->mesh->mode = GL_LINES;
+//                c->get(y)->mesh->renderArrays();
 //                lineRenderer.line(
 //                        vec3(c->levelLocation.x * Chunk::SIZE, 0, c->levelLocation.y * Chunk::SIZE),
 //                        vec3(c->levelLocation.x * Chunk::SIZE, ChunkColumn::NR_OF_CHUNKS * Chunk::SIZE, c->levelLocation.y * Chunk::SIZE),
@@ -138,10 +142,23 @@ class LevelScreen : public Screen
 //                        mu::X
 //                );
             }
+        }
+
+        terrainGeoShader.use();
+        for (auto &c : level.chunks.getLoadedColumns())
+        {
+            mat4 mvp = cam.combined * translate(mat4(1), vec3(c->levelLocation.x * Chunk::SIZE, 0, c->levelLocation.y * Chunk::SIZE));
+            glUniformMatrix4fv(terrainGeoShader.location("MVP"), 1, GL_FALSE, &mvp[0][0]);
+
+            c->texture->bind(0, terrainGeoShader, "u_bitmap");
+            ChunkColumn::meshForGeometryShader()->renderArrays();
+        }
 
         sceneBuffer->unbind();
 
         QuadRenderer::render(sceneBuffer->colorTexture);
+
+        MouseInput::setLockedMode(true);
     }
 
     void onResize() override
@@ -150,7 +167,7 @@ class LevelScreen : public Screen
         cam.viewportHeight = gu::heightPixels;
 
         delete sceneBuffer;
-        sceneBuffer = new FrameBuffer(gu::widthPixels / 4, gu::heightPixels / 4, 0);
+        sceneBuffer = new FrameBuffer(gu::widthPixels / 3, gu::heightPixels / 3, 0);
         sceneBuffer->addColorTexture(GL_RGB, GL_NEAREST, GL_NEAREST);
         sceneBuffer->addDepthTexture(GL_NEAREST, GL_NEAREST);
     }

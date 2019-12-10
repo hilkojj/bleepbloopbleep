@@ -9,5 +9,5 @@ out vec3 v_normal;
 void main()
 {
     gl_Position = MVP * vec4(vertexPosition_modelspace, 1);
-    v_normal = a_normal;
+    v_normal = vec3(1, 0, 0);
 }

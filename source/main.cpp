@@ -21,6 +21,8 @@ int main()
     gu::setScreen(&scr);
 
     gu::run();
+
+    std::cout << sizeof(Chunk) << '\n';
     
     return 0;
 }
